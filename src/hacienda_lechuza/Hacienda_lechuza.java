@@ -15,6 +15,15 @@ public class Hacienda_lechuza {
      */
     public static void main(String[] args) {
         // TODO code application logic here
+        
+        
+        loginp a = new loginp();
+        a.setVisible(true);
+        
+        
+        
+        
+        
     }
     
 }
