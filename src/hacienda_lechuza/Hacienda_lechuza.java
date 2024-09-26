@@ -19,10 +19,7 @@ public class Hacienda_lechuza {
         
         loginp a = new loginp();
         a.setVisible(true);
-        
-        
-        
-        
+ 
         
     }
     

@@ -18,6 +18,7 @@ public class loginp extends javax.swing.JFrame {
      */
     public loginp() {
         initComponents();
+        this.setLocationRelativeTo(this);
     }
 
     /**
@@ -191,7 +192,7 @@ public class loginp extends javax.swing.JFrame {
         
         
         
-        main a = new main();
+        Facturacion a = new Facturacion();
         a.show();
         this.hide();
         a.setLocationRelativeTo(this);
