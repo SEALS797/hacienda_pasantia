@@ -191,12 +191,12 @@ public class loginp extends javax.swing.JFrame {
         JOptionPane.showMessageDialog(null, "bienvenido: "+ userTxt.getText());
         
         
-        
+        if(userTxt.getText().equals("Guest") && passTxt.getText().equals("guest123")){
         Facturacion a = new Facturacion();
         a.show();
         this.hide();
         a.setLocationRelativeTo(this);
-        
+        }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
