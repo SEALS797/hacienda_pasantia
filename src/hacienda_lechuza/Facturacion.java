@@ -3,6 +3,22 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package hacienda_lechuza;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfDocument;
+import com.itextpdf.text.pdf.PdfGState;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.time.LocalDate;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 /**
  *
@@ -389,6 +405,7 @@ DefaultTableModel dtm = new DefaultTableModel();
         int iva = Integer.parseInt(txtimpuesto.getText());
         float iva_total = (float) (monto*(iva/100.0));
         float total = monto+((iva/100.0f)*monto);
+        
         dtm.addRow(new Object[]{
             txtcedula1.getText(),
             txtEmail.getText(),
@@ -400,6 +417,156 @@ DefaultTableModel dtm = new DefaultTableModel();
             iva_total,
             total
         });
+        
+        
+        JFileChooser chooser = new JFileChooser();
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        LocalDate fecha = LocalDate.now();
+        String fechaString = fecha.toString();
+        String filename = txtnombre.getText() +"_"+ fecha +"_"+ txtcabys.getText() + ".pdf";
+        int input = JOptionPane.showConfirmDialog(null, "Desea guardar una factura con esta informacion?");
+        if (input == 0) {
+            int result = chooser.showOpenDialog(null);
+
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFolder = chooser.getSelectedFile();
+                System.out.println("Selected folder: " + selectedFolder.getAbsolutePath());
+
+                File file = new File(selectedFolder.getAbsolutePath() + File.separator + filename);
+
+                try {
+                    FileOutputStream fos = new FileOutputStream(file);
+
+                    com.itextpdf.text.Document document = new com.itextpdf.text.Document();
+
+                    PdfWriter writer = PdfWriter.getInstance(document, fos);
+
+                    document.open();
+                    
+                    String iv = String.valueOf(iva_total);
+                    String to = String.valueOf(total);
+                    float threecol = 190f;
+                    float twocol = 285f;
+                    float twocol150 = twocol + 150f;
+                    float[] twocolumnwidth = {twocol150, twocol};
+                    float[] fullwidth = {threecol * 3};
+
+                    PdfPTable table = new PdfPTable(twocolumnwidth.length); // Number of columns
+
+                    // Create a bold font
+                    Font boldFont = new Font(Font.FontFamily.HELVETICA, 20, Font.BOLD);
+
+                    // Create the first cell with bold text
+                    PdfPCell cell1 = new PdfPCell(new Phrase("Lechuza Soluciones", boldFont));
+                    cell1.setBorder(PdfPCell.NO_BORDER);
+                    table.addCell(cell1);
+
+                    // Create a nested table
+                    PdfPTable nestedTable = new PdfPTable(2); // 2 columns
+                    Font nestedBoldFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
+
+                    // Add cells to the nested table
+                    nestedTable.addCell(new PdfPCell(new Phrase("Fecha", nestedBoldFont)));
+                    nestedTable.addCell(new PdfPCell(new Phrase(fechaString)));
+                    nestedTable.addCell(new PdfPCell(new Phrase("CAByS", nestedBoldFont)));
+                    nestedTable.addCell(new PdfPCell(new Phrase(txtcabys.getText())));
+
+                    // Add the nested table to the main table
+                    PdfPCell nestedCell = new PdfPCell(nestedTable);
+                    nestedCell.setBorder(PdfPCell.NO_BORDER);
+                    nestedCell.setPadding(10f); // Add padding for spacing
+                    table.addCell(nestedCell);
+
+                    // Add the main table to the document
+                    document.add(table);
+                    document.add(new Paragraph("\n")); // Add a line break for spacing
+
+                    // Create a divider table with a border
+                    PdfPTable divider = new PdfPTable(fullwidth.length);
+                    divider.setWidthPercentage(100); // Set width percentage to 100
+                    for (int i = 0; i < fullwidth.length; i++) {
+                        divider.addCell(new PdfPCell()); // Add empty cell for the divider
+                    }
+
+ 
+                    for (PdfPCell dividerCell : divider.getRow(0).getCells()) {
+                        dividerCell.setBorderWidth(2);
+                        dividerCell.setBorderColor(BaseColor.GRAY);
+                        dividerCell.setBackgroundColor(BaseColor.LIGHT_GRAY); 
+                    }
+
+ 
+                    document.add(divider);
+                    document.add(new Paragraph("\n")); 
+
+       
+                    PdfPTable serviceTable = new PdfPTable(3);
+                    serviceTable.setWidthPercentage(100); 
+
+      
+                    Font headerFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
+                    BaseColor grayColor = BaseColor.LIGHT_GRAY; 
+            
+                    
+                    PdfPCell servicioCell = new PdfPCell(new Phrase("Servicio", headerFont));
+                    servicioCell.setBackgroundColor(grayColor); 
+                    servicioCell.setBorder(PdfPCell.NO_BORDER);
+                    serviceTable.addCell(servicioCell);
+
+                    PdfPCell montoCell = new PdfPCell(new Phrase("Monto", headerFont));
+                    montoCell.setBackgroundColor(grayColor);
+                    montoCell.setBorder(PdfPCell.NO_BORDER);
+                    serviceTable.addCell(montoCell);
+
+                    PdfPCell ivaCell = new PdfPCell(new Phrase("IVA", headerFont));
+                    ivaCell.setBackgroundColor(grayColor); 
+                    ivaCell.setBorder(PdfPCell.NO_BORDER);
+                    serviceTable.addCell(ivaCell);
+                    
+
+                    serviceTable.addCell(new PdfPCell(new Phrase(txtnomservicio.getText())));
+                    serviceTable.addCell(new PdfPCell(new Phrase(txtmonto.getText())));
+                    serviceTable.addCell(new PdfPCell(new Phrase(txtimpuesto.getText()+"%")));
+
+
+                    PdfPCell emptyCell = new PdfPCell(new Phrase("")); 
+                    emptyCell.setBorder(PdfPCell.NO_BORDER); 
+                    serviceTable.addCell(emptyCell);
+                    
+
+                    PdfPCell totalLabelCell = new PdfPCell(new Phrase("IVA")); 
+                    totalLabelCell.setBorder(PdfPCell.NO_BORDER);
+                    totalLabelCell.setBackgroundColor(grayColor);
+                    serviceTable.addCell(totalLabelCell);
+                    
+                    PdfPCell totalValueCell = new PdfPCell(new Phrase(iv)); 
+                    serviceTable.addCell(totalValueCell);
+                    
+                    
+                    PdfPCell emptyCell2 = new PdfPCell(new Phrase("")); 
+                    emptyCell2.setBorder(PdfPCell.NO_BORDER); 
+                    serviceTable.addCell(emptyCell2);
+                    
+                    PdfPCell totalLabelCell1 = new PdfPCell(new Phrase("TOTAL")); 
+                    totalLabelCell1.setBorder(PdfPCell.NO_BORDER);
+                    totalLabelCell1.setBackgroundColor(grayColor);
+                    serviceTable.addCell(totalLabelCell1);
+                    
+                    PdfPCell totalValueCell1 = new PdfPCell(new Phrase(to)); 
+                    serviceTable.addCell(totalValueCell1);
+                                   
+                    document.add(serviceTable);
+                    
+                    document.close();
+                    fos.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                System.out.println("No folder was selected.");
+            }
+        }
+
     }//GEN-LAST:event_btn_facturarActionPerformed
 
     private void btn_actualizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_actualizarActionPerformed
